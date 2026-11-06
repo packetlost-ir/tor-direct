@@ -1,9 +1,9 @@
 from stem.control import Controller
 from tortalk.config import CONTROL_PORT
 
-def get_controller(control_port: int = CONTROL_PORT) -> Controller:
+def get_controller(control_port: int = CONTROL_PORT, password: str | None = None) -> Controller:
     controller = Controller.from_port(port=control_port)
-    controller.authenticate()
+    controller.authenticate(password=password)
     return controller
 
 def create_onion_service(
