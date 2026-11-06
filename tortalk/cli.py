@@ -13,15 +13,20 @@ from tortalk.network.protocol import (
 )
 from tortalk.crypto import encrypt_message, decrypt_message
 from tortalk.storage import StorageManager
+from tortalk.logger import setup_logging
+import logging
 from tortalk.ui.app import TorkApp
 
-async def async_listen(local_port: int, control_port: int, timeout: float):
+async def async_listen(local_port: int, control_port: int, timeout: float, tor_password: str | None = None):
+    setup_logging(config_dir=getattr(args_global, "config_dir", None), profile=getattr(args_global, "profile", None))
+    logger = logging.getLogger("tork.listen")
+    logger.info(f"Starting listener on port {local_port}, control port {control_port}")
     print(f"Connecting to Tor daemon (control port {control_port})...")
     storage = StorageManager(config_dir=getattr(args_global, "config_dir", None), profile=getattr(args_global, "profile", None))
     identity = storage.load_identity()
 
     try:
-        controller = get_controller(control_port=control_port)
+        controller = get_controller(control_port=control_port, password=tor_password)
     except Exception as e:
         print(f"Failed to connect to Tor control port: {e}", file=sys.stderr)
         return
@@ -106,6 +111,9 @@ async def async_listen(local_port: int, control_port: int, timeout: float):
         print("Done.")
 
 async def async_send(target_arg: str, message: str, socks_port: int, timeout: float, config_dir=None, profile=None):
+    setup_logging(config_dir=config_dir, profile=profile)
+    logger = logging.getLogger("tork.send")
+    logger.info(f"Initiating one-shot send to target {target_arg}")
     storage = StorageManager(config_dir=config_dir, profile=profile)
     resolved_onion = storage.get_contact(target_arg) or target_arg
 
@@ -148,13 +156,16 @@ async def async_send(target_arg: str, message: str, socks_port: int, timeout: fl
         except Exception:
             pass
 
-def handle_id(copy_to_clip: bool, control_port: int, config_dir=None, profile=None):
+def handle_id(copy_to_clip: bool, control_port: int, config_dir=None, profile=None, tor_password=None):
+    setup_logging(config_dir=config_dir, profile=profile)
+    logger = logging.getLogger("tork.id")
+    logger.info("Handling ID request")
     storage = StorageManager(config_dir=config_dir, profile=profile)
     identity = storage.load_identity()
     if not identity:
         print("No identity found. Generating identity...")
         try:
-            controller = get_controller(control_port=control_port)
+            controller = get_controller(control_port=control_port, password=tor_password)
             onion_hash, key_type, private_key = create_onion_service(controller, DEFAULT_LOCAL_PORT, await_publication=False)
             storage.save_identity(onion_hash, key_type, private_key)
             controller.close()
@@ -173,6 +184,9 @@ def handle_id(copy_to_clip: bool, control_port: int, config_dir=None, profile=No
             print(f"Could not copy to clipboard: {e}", file=sys.stderr)
 
 def handle_contact(args):
+    setup_logging(config_dir=args.config_dir, profile=args.profile)
+    logger = logging.getLogger("tork.contact")
+    logger.info(f"Handling contact action: {args.contact_action}")
     storage = StorageManager(config_dir=args.config_dir, profile=args.profile)
     subaction = args.contact_action
 
@@ -215,6 +229,7 @@ def main():
     parser.add_argument("-p", "--local-port", type=int, default=DEFAULT_LOCAL_PORT, help="Local TCP listen port")
     parser.add_argument("--socks-port", type=int, default=SOCKS_PORT, help="Tor SOCKS5 proxy port")
     parser.add_argument("--control-port", type=int, default=CONTROL_PORT, help="Tor ControlPort")
+    parser.add_argument("--tor-password", type=str, default=None, help="Tor ControlPort password")
     parser.add_argument("--timeout", type=float, default=CONNECT_TIMEOUT, help="Connection / handshake timeout")
 
     subparsers = parser.add_subparsers(dest="command", required=False)
@@ -251,7 +266,7 @@ def main():
 
     if command == "listen":
         try:
-            asyncio.run(async_listen(args.local_port, args.control_port, args.timeout))
+            asyncio.run(async_listen(args.local_port, args.control_port, args.timeout, tor_password=args.tor_password))
         except KeyboardInterrupt:
             pass
     elif command == "send":
@@ -260,7 +275,7 @@ def main():
         except KeyboardInterrupt:
             pass
     elif command == "id":
-        handle_id(args.copy, args.control_port, config_dir=args.config_dir, profile=args.profile)
+        handle_id(args.copy, args.control_port, config_dir=args.config_dir, profile=args.profile, tor_password=args.tor_password)
     elif command == "contact":
         handle_contact(args)
     elif command == "chat":
@@ -275,6 +290,7 @@ def main():
             local_port=args.local_port,
             socks_port=args.socks_port,
             control_port=args.control_port,
+            tor_password=args.tor_password,
             timeout=args.timeout
         )
         app.run()
