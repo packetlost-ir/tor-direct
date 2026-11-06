@@ -2,7 +2,10 @@ import asyncio
 import struct
 import json
 import time
+import logging
 from tortalk.crypto import generate_ephemeral_keypair, derive_shared_key, encrypt_message, decrypt_message
+
+logger = logging.getLogger("tork.network.protocol")
 
 # Opcodes
 OP_HANDSHAKE_INIT = 1
@@ -11,6 +14,8 @@ OP_CHAT = 3
 OP_PING = 4
 OP_PONG = 5
 
+MAX_FRAME_SIZE = 10 * 1024 * 1024  # 10MB
+
 async def send_frame(writer: asyncio.StreamWriter, data: bytes) -> None:
     writer.write(struct.pack("!I", len(data)) + data)
     await writer.drain()
@@ -18,6 +23,8 @@ async def send_frame(writer: asyncio.StreamWriter, data: bytes) -> None:
 async def receive_frame(reader: asyncio.StreamReader) -> bytes:
     header = await reader.readexactly(4)
     length = struct.unpack("!I", header)[0]
+    if length > MAX_FRAME_SIZE:
+        raise ValueError(f"Frame size too large: {length}")
     return await reader.readexactly(length)
 
 class PeerSession:
@@ -57,13 +64,16 @@ class PeerSession:
                 self.last_seen = time.time()
 
                 if opcode == OP_CHAT:
+                    logger.info(f"Incoming message received from peer {self.peer_hash}")
                     await self.app_callback("chat", self.peer_hash, payload)
                 elif opcode == OP_PING:
+                    logger.debug(f"Received PING from {self.peer_hash}")
                     await self.send_op(OP_PONG)
                 elif opcode == OP_PONG:
+                    logger.debug(f"Received PONG from {self.peer_hash}")
                     pass
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Reader loop terminated for {self.peer_hash}: {e}")
         finally:
             await self.close()
 
@@ -134,7 +144,7 @@ def decode_payload(data: bytes) -> tuple[str, str, str, str]:
     # Returns (type, display_name, sender_onion_hash, message).
     # Handle optional opcode prefix (1 byte)
     offset = 0
-    if len(data) > 0 and data[0] in (OP_HANDSHAKE_INIT, OP_HANDSHAKE_ACK, OP_CHAT, OP_PING, OP_PONG):
+    if len(data) > 0 and data[0] != 123:  # 123 is '{'
         offset = 1
     
     try:
