@@ -1,133 +1,152 @@
-# Tork (Tortalk)
+<div align="center">
 
-پروژه **Tork** یک اپلیکیشن چت پایانه (Terminal-based) همتا‌به‌همتا (P2P) و امن است که روی **سرویس‌های پیازی نسخه ۳ تور (Tor v3 Onion Services)** اجرا می‌شود و از **رمزنگاری سرتاسر (End-to-End Encryption - E2EE)** با استفاده از الگوریتم‌های X25519، HKDF و ChaCha20-Poly1305 پشتیبانی می‌کند. این نرم‌افزار دارای یک رابط کاربری جذاب ترمینالی (TUI) مبتنی بر کتابخانه Textual است.
+# 🧅 Tork (Tortalk)
+
+**Secure, Serverless, Peer-to-Peer Terminal Chat over Tor v3 Onion Services**  
+*Built with Python, Textual, and End-to-End Encryption (E2EE).*
+
+[![PyPI version](https://img.shields.io/pypi/v/tortalk.svg?style=flat-square)](https://pypi.org/project/tortalk/)
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg?style=flat-square)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
 ---
 
-## ۱. پیش‌نیازها
+> *"Absolute privacy, zero metadata leakage, directly from your terminal."*
 
-برای اجرای این برنامه، به موارد زیر نیاز دارید:
-1. **پایتون** نسخه ۳.۱۰ یا بالاتر (`python >= 3.10`)
-2. **سرویس تور (Tor Daemon)** نصب‌شده و در حال اجرا روی سیستم شما.
+</div>
 
 ---
 
-## ۲. نصب و راه‌اندازی سرویس تور (Tor Configuration)
+## 📸 Preview
 
-تور باید طوری تنظیم شود که پورت کنترل (ControlPort) و پورت پراکسی SOCKS5 را در دسترس قرار دهد تا پایتون بتواند سرویس‌های پیازی (Onion Services) موقت یا پایدار بسازد و ترافیک را از طریق شبکه تور هدایت کند.
-
-### الف) نصب تور
-- **لینوکس (Ubuntu / Debian):**
-  ```bash
-  sudo apt update
-  sudo apt install tor
-  ```
-- **مک (macOS):**
-  ```bash
-  brew install tor
-  ```
-
-### ب) تنظیمات فایل `torrc`
-فایل تنظیمات تور (معمولاً در مسیر `/etc/tor/torrc` در لینوکس یا از طریق Homebrew در مک) را باز کنید و اطمینان حاصل کنید که خطوط زیر بدون علامت `#` (کامنت) فعال هستند:
+<!-- 
+Example of how to add a screenshot image later:
+<div align="center">
+  <img src="https://raw.githubusercontent.com/username/tork/main/docs/screenshot.png" alt="Tork TUI Preview" width="800">
+</div>
+-->
 
 ```text
-SocksPort 9050
-ControlPort 9051
+┌─────────────────────────────────────────────────────────────┐
+│ 🧅 Tork Chat                                                │
+├─────────────────┬───────────────────────────────────────────┤
+│ CONTACTS        │ Chat: alice [E2EE Secured]                │
+│                 │                                           │
+│ ● alice         │ You                                       │
+│ ○ bob           │ Hello over Tor v3 onion service!          │
+│                 │ 14:05                                     │
+│                 │                                           │
+│                 │ alice                                     │
+│                 │ Secure and encrypted connection active.   │
+│                 │ 14:06                                     │
+│                 │                                           │
+│                 │ Type message...                           │
+└─────────────────┴───────────────────────────────────────────┘
 ```
-
-> **نکته امنیتی/دسترسی:** برای اینکه کتابخانه `stem` (مدیریت‌کننده تور در پایتون) بتواند به کنترل‌پورت متصل شود، کاربر سیستم‌عامل شما باید اجازه دسترسی به کنترل‌پورت تور را داشته باشد (یا از طریق Cookie Authentication که پیش‌فرض تور است احراز هویت انجام شود).
-
-### ج) اجرای سرویس تور
-- **لینوکس:**
-  ```bash
-  sudo systemctl start tor
-  sudo systemctl enable tor
-  ```
-- **مک:**
-  ```bash
-  brew services start tor
-  ```
 
 ---
 
-## ۳. نصب اپلیکیشن Tork
+## 📦 Installation from PyPI
 
-پس از کلون کردن مخزن پروژه یا دانلود آن، در پوشه اصلی پروژه دستورات زیر را برای نصب محیط مجازی و پکیج اجرا کنید:
+Tork is available on PyPI. You can install it directly via pip:
 
 ```bash
-# ایجاد و فعال‌سازی محیط مجازی
+pip install tortalk
+```
+
+---
+
+## 🛠️ System Requirements & Prerequisites
+
+For Tork to run successfully on any target machine, ensure the following requirements are met:
+
+### 1. Tor Daemon Configuration
+Tork communicates directly with the local Tor daemon via the ControlPort and SOCKS5 proxy.
+- **Tor Service:** Must be installed and actively running on the system.
+- **Ports (`/etc/tor/torrc`):**
+  ```text
+  SocksPort 9050
+  ControlPort 9051
+  ```
+- **Authentication:** By default, Tork relies on Tor cookie authentication or no-password control access. If your Tor daemon requires a password, supply it via the `--tor-password` flag.
+
+### 2. System Environment
+- **Python:** Version `3.10` or higher.
+- **Clipboard Utility (Optional):** For copying Onion IDs (`xclip` or `xsel` on Linux environments).
+
+---
+
+## 🚀 Installation
+
+Clone the repository and install it inside a virtual environment:
+
+```bash
+# Create and activate virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
-# نصب پکیج و وابستگی‌ها
+# Install package and dependencies in editable mode
 pip install --editable .
 ```
 
-با این کار دستور `tork` در محیط مجازی شما ثبت و آماده استفاده می‌شود.
-
 ---
 
-## ۴. نحوه استفاده و دستورات (CLI & TUI)
+## 💻 Usage & Commands
 
-این برنامه از پروفایل‌های مختلف پشتیبانی می‌کند تا بتوانید چندین نمونه (Instance) را هم‌زمان روی یک سیستم برای تست اجرا کنید.
+Tork supports multiple profiles to run isolated instances concurrently.
 
-### الف) اجرای محیط گرافیکی ترمینالی (TUI)
-برای اجرای محیط چت تعاملی:
+### 1. Interactive TUI Chat
+Launch the terminal UI:
 ```bash
 tork chat
 ```
-یا با تعیین یک پروفایل اختصاصی (مثلا برای کاربر آلیس):
+With a custom profile and custom port:
 ```bash
 tork --profile alice -p 5666
 ```
-و برای کاربر باب در ترمینالی دیگر:
-```bash
-tork --profile bob -p 5667
-```
 
-#### میانبرهای داخل محیط TUI:
-- کلید **`q`**: خروج امن و سریع از برنامه.
-- کلید **`a`**: افزودن مخاطب جدید (با وارد کردن آدرس پیازی ۵۶ کاراکتری).
-- کلید **`Ctrl + P`**: باز کردن Command Palette بومی برای کپی کردن شناسه پیازی خودتان یا افزودن مخاطب.
+#### TUI Keyboard Shortcuts:
+- **`q`**: Safe and clean exit.
+- **`a`**: Add a new peer contact (56-character onion hash).
+- **`Ctrl + P`**: Open Command Palette to copy your Onion ID or manage peers.
 
 ---
 
-### ب) سایر زیردستورات CLI
+### 2. CLI Subcommands
 
-1. **نمایش شناسه پیازی شخصی (Onion ID):**
-   ```bash
-   tork id --copy
-   ```
-   این دستور آدرس ۵۶ کاراکتری پیازی شما را نمایش داده و (در صورت امکان) در کلیپ‌بورد کپی می‌کند.
+- **Display Local Onion ID:**
+  ```bash
+  tork id --copy
+  ```
 
-2. **مدیریت مخاطبین (Contact Management):**
-   - افزودن مخاطب:
-     ```bash
-     tork contact add alice-pc <56-char-onion-hash>
-     ```
-   - لیست مخاطبین ذخیره‌شده:
-     ```bash
-     tork contact list
-     ```
-   - حذف مخاطب:
-     ```bash
-     tork contact remove alice-pc
-     ```
+- **Contact Management:**
+  ```bash
+  # Add contact
+  tork contact add alice <56-char-onion-hash>
 
-3. **گوش دادن به درخواست‌های ورودی (Headless Listener):**
-   ```bash
-   tork listen -p 5666
-   ```
+  # List contacts
+  tork contact list
 
-4. **ارسال پیام مستقیم (One-shot CLI Send):**
-   ```bash
-   tork send <onion-address-or-alias> "سلام، این یک پیام رمزنگاری شده است"
-   ```
+  # Remove contact
+  tork contact remove alice
+  ```
+
+- **Headless Listener (Daemon mode):**
+  ```bash
+  tork listen -p 5666 --tor-password "your_password"
+  ```
+
+- **One-shot CLI Message Send:**
+  ```bash
+  tork send <onion-address-or-alias> "Hello over Tor E2EE!"
+  ```
 
 ---
 
-## ۵. ویژگی‌های معماری و امنیتی
-- **رمزنگاری سرتاسر (E2EE):** تبادل کلید با استفاده از مبادله کلید Diffie-Hellman از نوع X25519، مشتق‌سازی کلید با HKDF و رمزنگاری پیام‌ها با الگوریتم AEAD از نوع ChaCha20-Poly1305.
-- **بدون لو رفتن IP (Socks5 Only):** تمامی ارتباطات صرفاً از طریق پراکسی SOCKS5 تور انجام می‌شود.
-- **مدیریت جلسات پایدار (Multiplexed Long-Lived Sessions):** عدم نیاز به بازسازی مدارهای تور برای هر پیام؛ ارتباطات دوطرفه زنده با قابلیت تشخیص وضعیت آنلاین/آفلاین (Heartbeat / Ping-Pong).
-- **تاریخچه موقت در RAM:** پیام‌های چت صرفاً در حافظه موقت (RAM) جلسه فعال نگهداری می‌شوند و پس از بستن برنامه کاملاً پاک می‌شوند؛ تنها هویت و مخاطبین در فایل‌های امن محلی ذخیره می‌گردند.
+## 🔒 Security Architecture
+
+- **End-to-End Encryption (E2EE):** Ephemeral X25519 Diffie-Hellman key exchange, HKDF key derivation, and ChaCha20-Poly1305 AEAD authenticated encryption.
+- **Zero IP Leakage:** All network traffic is exclusively routed through the Tor SOCKS5 proxy.
+- **Persistent Ephemeral Services:** Long-lived multiplexed connections with heartbeat/ping-pong checks.
+- **RAM-Only History:** Chat histories are stored purely in memory and cleared upon exit. Only identity keys and contacts are safely persisted to disk with strict `0600` file permissions.
+
