@@ -25,9 +25,11 @@ class StorageManager:
             "key_type": key_type,
             "private_key": private_key
         }
-        with open(self.identity_file, "w", encoding="utf-8") as f:
+        temp_file = self.identity_file.with_suffix(".tmp")
+        fd = os.open(temp_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
-        os.chmod(self.identity_file, 0o600)
+        os.replace(temp_file, self.identity_file)
 
     def _load_contacts_raw(self) -> dict:
         if not self.contacts_file.exists():
@@ -43,9 +45,11 @@ class StorageManager:
             return {}
 
     def _save_contacts_raw(self, contacts: dict) -> None:
-        with open(self.contacts_file, "w", encoding="utf-8") as f:
+        temp_file = self.contacts_file.with_suffix(".tmp")
+        fd = os.open(temp_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             json.dump(contacts, f, indent=2)
-        os.chmod(self.contacts_file, 0o600)
+        os.replace(temp_file, self.contacts_file)
 
     def list_contacts(self) -> dict[str, dict]:
         """Returns normalized contacts: { alias: { nickname, onion, last_seen } }"""
@@ -129,3 +133,11 @@ class StorageManager:
         contacts[new_alias] = data
         self._save_contacts_raw(contacts)
         return True
+
+    def remove_contact(self, alias: str) -> bool:
+        contacts = self._load_contacts_raw()
+        if alias in contacts:
+            contacts.pop(alias)
+            self._save_contacts_raw(contacts)
+            return True
+        return False
