@@ -9,6 +9,8 @@ from rich.panel import Panel
 
 from tortalk.config import DEFAULT_LOCAL_PORT, SOCKS_PORT, CONTROL_PORT, CONNECT_TIMEOUT, clean_hash, normalize_and_validate_onion
 from tortalk.storage import StorageManager
+from tortalk.logger import setup_logging
+import logging
 from tortalk.network.tor import get_controller, create_onion_service, destroy_onion_service
 from tortalk.network.server import PeerServer
 from tortalk.network.client import connect_peer
@@ -40,10 +42,13 @@ class TorkApp(App):
     COMMANDS = App.COMMANDS | {TorkCommandProvider}
     BINDINGS = [("q", "quit", "Quit"), ("a", "prompt_add_contact", "Add Contact")]
 
-    def __init__(self, initial_target=None, config_dir=None, profile=None, local_port=DEFAULT_LOCAL_PORT, socks_port=SOCKS_PORT, control_port=CONTROL_PORT, timeout=CONNECT_TIMEOUT):
+    def __init__(self, initial_target=None, config_dir=None, profile=None, local_port=DEFAULT_LOCAL_PORT, socks_port=SOCKS_PORT, control_port=CONTROL_PORT, tor_password=None, timeout=CONNECT_TIMEOUT):
         super().__init__()
+        setup_logging(config_dir=config_dir, profile=profile)
+        self.logger = logging.getLogger("tork.app")
+        self.logger.info("Initializing TorkApp")
         self.storage = StorageManager(config_dir=config_dir, profile=profile)
-        self.local_port, self.socks_port, self.control_port, self.timeout = local_port, socks_port, control_port, timeout
+        self.local_port, self.socks_port, self.control_port, self.tor_password, self.timeout = local_port, socks_port, control_port, tor_password, timeout
         self.profile = profile
         self.sessions = {} # hash -> PeerSession
         self.chat_buffers = {} # hash -> list
@@ -51,6 +56,7 @@ class TorkApp(App):
         self.active_peer_hash = None
         self.local_onion_hash = ""
         self.display_name = profile or ""
+        self._closing = False
 
     def action_copy_onion_id(self) -> None:
         if self.local_onion_hash:
@@ -115,12 +121,13 @@ class TorkApp(App):
         yield Footer()
 
     async def on_mount(self):
-        await self.start_services()
         self.refresh_contacts()
+        self.run_worker(self.start_services())
 
     async def start_services(self):
+        self.query_one("#chat-header", Static).update("Starting Tor services...")
         try:
-            self.controller = await asyncio.to_thread(get_controller, self.control_port)
+            self.controller = await asyncio.to_thread(get_controller, self.control_port, self.tor_password)
             id = self.storage.load_identity()
             if id:
                 h, _, _ = await asyncio.to_thread(
@@ -218,6 +225,13 @@ class TorkApp(App):
             if event.type == "closed": self.sessions.pop(h, None)
             self.refresh_contacts()
 
+    def on_resize(self, event) -> None:
+        if hasattr(self, "active_peer_hash") and self.active_peer_hash:
+            log = self.query_one("#chat-log", RichLog)
+            log.clear()
+            for m in self.chat_buffers.get(self.active_peer_hash, []):
+                self.write_message_to_log(m["sender"], m["text"], m["ts"], self.active_peer_hash)
+
     def refresh_contacts(self) -> None:
         if not self.is_mounted or self._closing or getattr(self, "_pruning", False):
             return
@@ -280,6 +294,7 @@ class TorkApp(App):
         if not text or not h or h not in self.sessions: return
         event.input.value = ""
         ts = time.strftime("%H:%M")
+        self.logger.info(f"Outgoing message sent to peer {h}")
         await self.sessions[h].send_op(OP_CHAT, {"m": text, "ts": ts})
         msg = {"sender": "me", "text": text, "ts": ts}
         if h not in self.chat_buffers: self.chat_buffers[h] = []
@@ -305,7 +320,6 @@ class TorkApp(App):
             except Exception: pass
 
     async def action_quit(self):
-        import os, sys
-        os._exit(0)
+        self.exit()
 
 
