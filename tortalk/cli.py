@@ -2,7 +2,10 @@ import asyncio
 import argparse
 import sys
 import traceback
-import pyperclip
+try:
+    import pyperclip
+except ImportError:
+    pyperclip = None
 from tortalk.config import DEFAULT_LOCAL_PORT, SOCKS_PORT, CONTROL_PORT, CONNECT_TIMEOUT, normalize_and_validate_onion, clean_hash
 from tortalk.network.tor import get_controller, create_onion_service, destroy_onion_service
 from tortalk.network.server import PeerServer
@@ -177,11 +180,14 @@ def handle_id(copy_to_clip: bool, control_port: int, config_dir=None, profile=No
     h = clean_hash(identity["service_id"])
     print(f"Your persistent Tor Onion Address (hash): {h}")
     if copy_to_clip:
-        try:
-            pyperclip.copy(h)
-            print("Copied 56-character hash to clipboard.")
-        except Exception as e:
-            print(f"Could not copy to clipboard: {e}", file=sys.stderr)
+        if pyperclip:
+            try:
+                pyperclip.copy(h)
+                print("Copied 56-character hash to clipboard.")
+            except Exception as e:
+                print(f"Could not copy to clipboard: {e}", file=sys.stderr)
+        else:
+            print("pyperclip not installed, could not copy to clipboard.", file=sys.stderr)
 
 def handle_contact(args):
     setup_logging(config_dir=args.config_dir, profile=args.profile)

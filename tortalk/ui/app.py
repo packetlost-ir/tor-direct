@@ -122,31 +122,100 @@ class TorkApp(App):
 
     async def on_mount(self):
         self.refresh_contacts()
-        self.run_worker(self.start_services())
+        self.run_worker(self.start_services(), name="tor-init", exclusive=True)
 
     async def start_services(self):
-        self.query_one("#chat-header", Static).update("Starting Tor services...")
+        if getattr(self, "_services_started", False):
+            return
+        self._services_started = True
+        
+        header = self.query_one("#chat-header", Static)
+        self.logger.info("Tor services startup initiated")
+        
         try:
-            self.controller = await asyncio.to_thread(get_controller, self.control_port, self.tor_password)
-            id = self.storage.load_identity()
-            if id:
-                h, _, _ = await asyncio.to_thread(
-                    create_onion_service, 
-                    self.controller, 
-                    self.local_port, 
-                    id["key_type"], 
-                    id["private_key"]
-                )
+            # 1. Connecting
+            header.update("[bold yellow]Connecting to Tor...[/]")
+            try:
+                self.controller = await asyncio.to_thread(get_controller, self.control_port, self.tor_password)
+            except Exception as e:
+                self.logger.error(f"Failed to connect to Tor ControlPort: {e}")
+                header.update("[bold red]Connection Failed[/]")
+                self.notify(f"Tor connection failed: {e}", severity="error")
+                return
+
+            # 2. Authenticating (Already done in get_controller, but let's be explicit)
+            header.update("[bold yellow]Authenticating with Tor...[/]")
+            if not self.controller.is_authenticated():
+                try:
+                    await asyncio.to_thread(self.controller.authenticate, password=self.tor_password)
+                except Exception as e:
+                    header.update("[bold red]Authentication Failed[/]")
+                    self.notify(f"Tor auth failed: {e}", severity="error")
+                    return
+            self.logger.info("Tor authenticated")
+
+            # 3. Bootstrap
+            header.update("[bold yellow]Waiting for Tor bootstrap...[/]")
+            from tortalk.network.tor import wait_for_bootstrap
+            bootstrapped = await asyncio.to_thread(wait_for_bootstrap, self.controller, timeout=30)
+            if not bootstrapped:
+                self.logger.warning("Tor not fully bootstrapped, proceeding anyway")
             else:
-                h, t, k = await asyncio.to_thread(create_onion_service, self.controller, self.local_port)
-                self.storage.save_identity(h, t, k)
-            self.local_onion_hash = clean_hash(h)
-            if not self.display_name: self.display_name = f"peer-{self.local_onion_hash[:6]}"
+                self.logger.info("Tor bootstrapped")
             
+            # 4. Onion Service
+            header.update("[bold yellow]Creating Onion Service...[/]")
+            id_data = self.storage.load_identity()
+            
+            # Use a longer timeout for publication as it can take up to 2 mins
+            try:
+                if id_data:
+                    self.logger.info("Restoring onion service from saved identity")
+                    h, _, _ = await asyncio.to_thread(
+                        create_onion_service, 
+                        self.controller, 
+                        self.local_port, 
+                        id_data["key_type"], 
+                        id_data["private_key"]
+                    )
+                else:
+                    self.logger.info("Creating new ephemeral onion service")
+                    h, t, k = await asyncio.to_thread(create_onion_service, self.controller, self.local_port)
+                    self.storage.save_identity(h, t, k)
+            except Exception as e:
+                self.logger.error(f"Onion service creation failed: {e}")
+                header.update("[bold red]Onion Service Failed[/]")
+                self.notify(f"Onion failed: {e}", severity="error")
+                return
+            
+            self.local_onion_hash = clean_hash(h)
+            self.logger.info(f"Onion Service Ready: {self.local_onion_hash}")
+            if not self.display_name:
+                self.display_name = f"peer-{self.local_onion_hash[:6]}"
+            
+            # 5. Peer Server
+            header.update("[bold yellow]Starting Peer Server...[/]")
             self.server = PeerServer("127.0.0.1", self.local_port, self.local_onion_hash, self.display_name, self.register_session)
-            await self.server.start()
+            try:
+                await self.server.start()
+            except Exception as e:
+                self.logger.error(f"PeerServer failed to start: {e}")
+                header.update("[bold red]Peer Server Failed[/]")
+                self.notify(f"Server failed: {e}", severity="error")
+                return
+            self.logger.info("Peer server listening")
+
+            # 6. Ready
+            header.update(f"[bold green]Ready:[/] {self.display_name} ({self.local_onion_hash[:8]}...)")
+            self.notify("Tork is ready!", title="Initialization")
+            self.refresh_contacts()
+            
         except Exception as e:
-            self.notify(f"Init error: {e}", severity="error")
+            self.logger.error(f"Unexpected initialization error: {e}", exc_info=True)
+            header.update("[bold red]Initialization Failed[/]")
+            self.notify(f"Error: {e}", severity="error")
+        finally:
+            self._services_started_complete = True
 
     async def register_session(self, r, w, key, h, n, init):
         h = clean_hash(h)
@@ -303,15 +372,19 @@ class TorkApp(App):
 
     async def on_unmount(self):
         self._closing = True
+        
+        # Cancel all workers (including tor-init)
+        for worker in self.workers:
+            worker.cancel()
+            
         for s in list(self.sessions.values()):
             try: await s.close()
             except Exception: pass
         self.sessions.clear()
         
-        if hasattr(self, 'server') and self.server and self.server.server:
+        if hasattr(self, 'server') and self.server:
             try:
-                self.server.server.close()
-                await self.server.server.wait_closed()
+                await self.server.stop()
             except Exception: pass
             
         if hasattr(self, 'controller') and self.controller:

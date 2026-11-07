@@ -1,10 +1,32 @@
 from stem.control import Controller
 from tortalk.config import CONTROL_PORT
+import time
 
 def get_controller(control_port: int = CONTROL_PORT, password: str | None = None) -> Controller:
-    controller = Controller.from_port(port=control_port)
-    controller.authenticate(password=password)
+    try:
+        controller = Controller.from_port(port=control_port)
+    except Exception as e:
+        raise ConnectionError(f"Could not connect to Tor control port {control_port}: {e}")
+        
+    try:
+        controller.authenticate(password=password)
+    except Exception as e:
+        controller.close()
+        raise PermissionError(f"Tor authentication failed: {e}")
+        
     return controller
+
+def wait_for_bootstrap(controller: Controller, timeout: int = 60) -> bool:
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            bootstrap = controller.get_info("status/bootstrap-phase")
+            if "PROGRESS=100" in bootstrap:
+                return True
+        except Exception:
+            pass
+        time.sleep(1)
+    return False
 
 def create_onion_service(
     controller: Controller,
@@ -13,6 +35,11 @@ def create_onion_service(
     key_content: str = "ED25519-V3",
     await_publication: bool = True
 ) -> tuple[str, str, str]:
+    # Ensure Tor is bootstrapped before creating service if we wait for publication
+    if await_publication and not wait_for_bootstrap(controller, timeout=30):
+        # We still try, but publication might take longer
+        pass
+        
     response = controller.create_ephemeral_hidden_service(
         {80: local_port},
         await_publication=await_publication,
