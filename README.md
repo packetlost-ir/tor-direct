@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🧅 TorDirect (tor_direct)
+<img src="/logo.png" width="250" height="auto">
+
+# TorDirect
 
 **Secure, Serverless, Peer-to-Peer Terminal Chat over Tor v3 Onion Services**
 
@@ -17,7 +19,7 @@
 pip install tor_direct
 ```
 
-For Arch Linux / Omarchy specific setup, see [setup](setup).
+see [setup](/SETUP.md).
 
 ---
 
