@@ -258,3 +258,5 @@ sudo mkdir -p /etc/systemd/system/tor.service.d
 
 ### 4. راه‌اندازی سرویس
 sudo systemctl enable --now tor.service
+
+For Arch Linux / Omarchy specific setup, see [ARCH_SETUP.md](ARCH_SETUP.md).
