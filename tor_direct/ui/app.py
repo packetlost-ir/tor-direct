@@ -7,16 +7,16 @@ from textual.message import Message
 from textual import work
 from rich.panel import Panel
 
-from t0rd.config import DEFAULT_LOCAL_PORT, SOCKS_PORT, CONTROL_PORT, CONNECT_TIMEOUT, clean_hash, normalize_and_validate_onion
-from t0rd.storage import StorageManager
-from t0rd.logger import setup_logging
+from tor_direct.config import DEFAULT_LOCAL_PORT, SOCKS_PORT, CONTROL_PORT, CONNECT_TIMEOUT, clean_hash, normalize_and_validate_onion
+from tor_direct.storage import StorageManager
+from tor_direct.logger import setup_logging
 import logging
-from t0rd.network.tor import get_controller, create_onion_service, destroy_onion_service
-from t0rd.network.server import PeerServer
-from t0rd.network.client import connect_peer
-from t0rd.network.protocol import PeerSession, OP_CHAT, perform_protocol_handshake
-from t0rd.ui.commands import T0rdCommandProvider
-from t0rd.ui.modals import AddContactModal
+from tor_direct.network.tor import get_controller, create_onion_service, destroy_onion_service
+from tor_direct.network.server import PeerServer
+from tor_direct.network.client import connect_peer
+from tor_direct.network.protocol import PeerSession, OP_CHAT, perform_protocol_handshake
+from tor_direct.ui.commands import T0rdCommandProvider
+from tor_direct.ui.modals import AddContactModal
 
 class PeerEvent(Message):
     def __init__(self, type, peer_hash, data=None):
@@ -46,7 +46,7 @@ class T0rdApp(App):
     def __init__(self, initial_target=None, config_dir=None, profile=None, local_port=DEFAULT_LOCAL_PORT, socks_port=SOCKS_PORT, control_port=CONTROL_PORT, tor_password=None, timeout=CONNECT_TIMEOUT):
         super().__init__()
         setup_logging(config_dir=config_dir, profile=profile)
-        self.logger = logging.getLogger("t0rd.app")
+        self.logger = logging.getLogger("tor_direct.app")
         self.logger.info("Initializing T0rdApp")
         self.storage = StorageManager(config_dir=config_dir, profile=profile)
         self.local_port, self.socks_port, self.control_port, self.tor_password, self.timeout = local_port, socks_port, control_port, tor_password, timeout
@@ -157,7 +157,7 @@ class T0rdApp(App):
 
             # 3. Bootstrap
             header.update("[bold yellow]Waiting for Tor bootstrap...[/]")
-            from t0rd.network.tor import wait_for_bootstrap
+            from tor_direct.network.tor import wait_for_bootstrap
             bootstrapped = await asyncio.to_thread(wait_for_bootstrap, self.controller, timeout=30)
             if not bootstrapped:
                 self.logger.warning("Tor not fully bootstrapped, proceeding anyway")

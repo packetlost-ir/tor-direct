@@ -2,9 +2,9 @@ import asyncio
 import logging
 from python_socks import ProxyType, ProxyError
 from python_socks.async_.asyncio import Proxy
-from t0rd.config import normalize_and_validate_onion, SOCKS_HOST, SOCKS_PORT, CONNECT_TIMEOUT
+from tor_direct.config import normalize_and_validate_onion, SOCKS_HOST, SOCKS_PORT, CONNECT_TIMEOUT
 
-logger = logging.getLogger("t0rd.network.client")
+logger = logging.getLogger("tor_direct.network.client")
 
 async def connect_peer(target_onion, socks_host=SOCKS_HOST, socks_port=SOCKS_PORT, timeout=CONNECT_TIMEOUT):
     is_valid, normalized_addr, err = normalize_and_validate_onion(target_onion)

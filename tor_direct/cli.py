@@ -6,23 +6,23 @@ try:
     import pyperclip
 except ImportError:
     pyperclip = None
-from t0rd.config import DEFAULT_LOCAL_PORT, SOCKS_PORT, CONTROL_PORT, CONNECT_TIMEOUT, normalize_and_validate_onion, clean_hash
-from t0rd.network.tor import get_controller, create_onion_service, destroy_onion_service
-from t0rd.network.server import PeerServer
-from t0rd.network.client import connect_peer
-from t0rd.network.protocol import (
+from tor_direct.config import DEFAULT_LOCAL_PORT, SOCKS_PORT, CONTROL_PORT, CONNECT_TIMEOUT, normalize_and_validate_onion, clean_hash
+from tor_direct.network.tor import get_controller, create_onion_service, destroy_onion_service
+from tor_direct.network.server import PeerServer
+from tor_direct.network.client import connect_peer
+from tor_direct.network.protocol import (
     send_frame, receive_frame, perform_protocol_handshake,
     encode_payload, decode_payload, OP_CHAT,
 )
-from t0rd.crypto import encrypt_message, decrypt_message
-from t0rd.storage import StorageManager
-from t0rd.logger import setup_logging
+from tor_direct.crypto import encrypt_message, decrypt_message
+from tor_direct.storage import StorageManager
+from tor_direct.logger import setup_logging
 import logging
-from t0rd.ui.app import T0rdApp
+from tor_direct.ui.app import T0rdApp
 
 async def async_listen(local_port: int, control_port: int, timeout: float, tor_password: str | None = None):
     setup_logging(config_dir=getattr(args_global, "config_dir", None), profile=getattr(args_global, "profile", None))
-    logger = logging.getLogger("t0rd.listen")
+    logger = logging.getLogger("tor_direct.listen")
     logger.info(f"Starting listener on port {local_port}, control port {control_port}")
     print(f"Connecting to Tor daemon (control port {control_port})...")
     storage = StorageManager(config_dir=getattr(args_global, "config_dir", None), profile=getattr(args_global, "profile", None))
@@ -115,7 +115,7 @@ async def async_listen(local_port: int, control_port: int, timeout: float, tor_p
 
 async def async_send(target_arg: str, message: str, socks_port: int, timeout: float, config_dir=None, profile=None):
     setup_logging(config_dir=config_dir, profile=profile)
-    logger = logging.getLogger("t0rd.send")
+    logger = logging.getLogger("tor_direct.send")
     logger.info(f"Initiating one-shot send to target {target_arg}")
     storage = StorageManager(config_dir=config_dir, profile=profile)
     resolved_onion = storage.get_contact(target_arg) or target_arg
@@ -161,7 +161,7 @@ async def async_send(target_arg: str, message: str, socks_port: int, timeout: fl
 
 def handle_id(copy_to_clip: bool, control_port: int, config_dir=None, profile=None, tor_password=None):
     setup_logging(config_dir=config_dir, profile=profile)
-    logger = logging.getLogger("t0rd.id")
+    logger = logging.getLogger("tor_direct.id")
     logger.info("Handling ID request")
     storage = StorageManager(config_dir=config_dir, profile=profile)
     identity = storage.load_identity()
@@ -191,7 +191,7 @@ def handle_id(copy_to_clip: bool, control_port: int, config_dir=None, profile=No
 
 def handle_contact(args):
     setup_logging(config_dir=args.config_dir, profile=args.profile)
-    logger = logging.getLogger("t0rd.contact")
+    logger = logging.getLogger("tor_direct.contact")
     logger.info(f"Handling contact action: {args.contact_action}")
     storage = StorageManager(config_dir=args.config_dir, profile=args.profile)
     subaction = args.contact_action
@@ -227,7 +227,7 @@ args_global = None
 
 def main():
     global args_global
-    parser = argparse.ArgumentParser(description="TorDirect (t0rd) P2P Terminal Chat over Tor")
+    parser = argparse.ArgumentParser(description="TorDirect (tor_direct) P2P Terminal Chat over Tor")
     
     # Global arguments
     parser.add_argument("--config-dir", type=str, default=None, help="Custom configuration directory")

@@ -1,4 +1,4 @@
-from t0rd.cli import main
+from tor_direct.cli import main
 
 if __name__ == "__main__":
     main()

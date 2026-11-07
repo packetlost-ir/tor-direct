@@ -1,5 +1,5 @@
 from stem.control import Controller
-from t0rd.config import CONTROL_PORT
+from tor_direct.config import CONTROL_PORT
 import time
 
 def get_controller(control_port: int = CONTROL_PORT, password: str | None = None) -> Controller:

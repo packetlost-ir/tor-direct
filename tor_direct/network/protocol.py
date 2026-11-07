@@ -3,9 +3,9 @@ import struct
 import json
 import time
 import logging
-from t0rd.crypto import generate_ephemeral_keypair, derive_shared_key, encrypt_message, decrypt_message
+from tor_direct.crypto import generate_ephemeral_keypair, derive_shared_key, encrypt_message, decrypt_message
 
-logger = logging.getLogger("t0rd.network.protocol")
+logger = logging.getLogger("tor_direct.network.protocol")
 
 # Opcodes
 OP_HANDSHAKE_INIT = 1

@@ -1,11 +1,11 @@
 <div align="center">
 
-# 🧅 TorDirect (t0rd)
+# 🧅 TorDirect (tor_direct)
 
 **Secure, Serverless, Peer-to-Peer Terminal Chat over Tor v3 Onion Services**  
 *Built with Python, Textual, and End-to-End Encryption (E2EE).*
 
-[![PyPI version](https://img.shields.io/pypi/v/t0rd.svg?style=flat-square)](https://pypi.org/project/t0rd/)
+[![PyPI version](https://img.shields.io/pypi/v/tor_direct.svg?style=flat-square)](https://pypi.org/project/tor_direct/)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg?style=flat-square)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
@@ -22,7 +22,7 @@
 <!-- 
 Example of how to add a screenshot image later:
 <div align="center">
-  <img src="https://raw.githubusercontent.com/username/t0rd/main/docs/screenshot.png" alt="T0rd TUI Preview" width="800">
+  <img src="https://raw.githubusercontent.com/username/tor_direct/main/docs/screenshot.png" alt="T0rd TUI Preview" width="800">
 </div>
 -->
 
@@ -51,7 +51,7 @@ Example of how to add a screenshot image later:
 TorDirect is available on PyPI. You can install it directly via pip:
 
 ```bash
-pip install t0rd
+pip install tor_direct
 ```
 
 ---
@@ -98,11 +98,11 @@ TorDirect supports multiple profiles to run isolated instances concurrently.
 ### 1. Interactive TUI Chat
 Launch the terminal UI:
 ```bash
-t0rd chat
+tor_direct chat
 ```
 With a custom profile and custom port:
 ```bash
-t0rd --profile alice -p 5666
+tor_direct --profile alice -p 5666
 ```
 
 #### TUI Keyboard Shortcuts:
@@ -116,29 +116,29 @@ t0rd --profile alice -p 5666
 
 - **Display Local Onion ID:**
   ```bash
-  t0rd id --copy
+  tor_direct id --copy
   ```
 
 - **Contact Management:**
   ```bash
   # Add contact
-  t0rd contact add alice <56-char-onion-hash>
+  tor_direct contact add alice <56-char-onion-hash>
 
   # List contacts
-  t0rd contact list
+  tor_direct contact list
 
   # Remove contact
-  t0rd contact remove alice
+  tor_direct contact remove alice
   ```
 
 - **Headless Listener (Daemon mode):**
   ```bash
-  t0rd listen -p 5666 --tor-password "your_password"
+  tor_direct listen -p 5666 --tor-password "your_password"
   ```
 
 - **One-shot CLI Message Send:**
   ```bash
-  t0rd send <onion-address-or-alias> "Hello over Tor E2EE!"
+  tor_direct send <onion-address-or-alias> "Hello over Tor E2EE!"
   ```
 
 ---
