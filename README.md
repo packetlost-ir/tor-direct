@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🧅 T0rd (Tortalk)
+# 🧅 TorDirect (t0rd)
 
 **Secure, Serverless, Peer-to-Peer Terminal Chat over Tor v3 Onion Services**  
 *Built with Python, Textual, and End-to-End Encryption (E2EE).*
@@ -28,7 +28,7 @@ Example of how to add a screenshot image later:
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│ 🧅 T0rd Chat                                                │
+│ 🧅 TorDirect Chat                                           │
 ├─────────────────┬───────────────────────────────────────────┤
 │ CONTACTS        │ Chat: alice [E2EE Secured]                │
 │                 │                                           │
@@ -48,7 +48,7 @@ Example of how to add a screenshot image later:
 
 ## 📦 Installation from PyPI
 
-T0rd is available on PyPI. You can install it directly via pip:
+TorDirect is available on PyPI. You can install it directly via pip:
 
 ```bash
 pip install t0rd
@@ -58,7 +58,7 @@ pip install t0rd
 
 ## 🛠️ System Requirements & Prerequisites
 
-For T0rd to run successfully on any target machine, ensure the following requirements are met:
+For TorDirect to run successfully on any target machine, ensure the following requirements are met:
 
 ### 1. Tor Daemon Configuration
 T0rd communicates directly with the local Tor daemon via the ControlPort and SOCKS5 proxy.
@@ -93,7 +93,7 @@ pip install --editable .
 
 ## 💻 Usage & Commands
 
-T0rd supports multiple profiles to run isolated instances concurrently.
+TorDirect supports multiple profiles to run isolated instances concurrently.
 
 ### 1. Interactive TUI Chat
 Launch the terminal UI:

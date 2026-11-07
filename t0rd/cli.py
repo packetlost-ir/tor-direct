@@ -227,7 +227,7 @@ args_global = None
 
 def main():
     global args_global
-    parser = argparse.ArgumentParser(description="T0rd P2P Terminal Chat over Tor")
+    parser = argparse.ArgumentParser(description="TorDirect (t0rd) P2P Terminal Chat over Tor")
     
     # Global arguments
     parser.add_argument("--config-dir", type=str, default=None, help="Custom configuration directory")

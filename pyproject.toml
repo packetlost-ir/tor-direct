@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "t0rd"
 version = "1.0.7"
-description = "Secure, peer-to-peer terminal chat over Tor v3 onion services with E2EE"
+description = "TorDirect (t0rd): Secure, peer-to-peer terminal chat over Tor v3 onion services with E2EE"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }

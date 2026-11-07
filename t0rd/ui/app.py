@@ -26,6 +26,7 @@ class PeerEvent(Message):
         super().__init__()
 
 class T0rdApp(App):
+    TITLE = "TorDirect"
     CSS = """
     Screen { background: $surface; color: $text; }
     #main { layout: horizontal; }
@@ -207,7 +208,7 @@ class T0rdApp(App):
 
             # 6. Ready
             header.update(f"[bold green]Ready:[/] {self.display_name} ({self.local_onion_hash[:8]}...)")
-            self.notify("T0rd is ready!", title="Initialization")
+            self.notify("TorDirect is ready!", title="Initialization")
             self.refresh_contacts()
             
         except Exception as e:
