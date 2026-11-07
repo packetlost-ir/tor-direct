@@ -56,5 +56,5 @@ def resolve_config_dir(config_dir: str | Path | None = None, profile: str | None
     if config_dir:
         return Path(config_dir).expanduser().resolve()
     if profile:
-        return (Path.home() / ".config" / "tork" / "profiles" / profile).resolve()
-    return (Path.home() / ".config" / "tork").resolve()
+        return (Path.home() / ".config" / "t0rd" / "profiles" / profile).resolve()
+    return (Path.home() / ".config" / "t0rd").resolve()

@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from tortalk.config import resolve_config_dir
+from t0rd.config import resolve_config_dir
 
 def setup_logging(config_dir: str | Path | None = None, profile: str | None = None) -> Path:
     cfg_dir = resolve_config_dir(config_dir, profile)
@@ -22,6 +22,6 @@ def setup_logging(config_dir: str | Path | None = None, profile: str | None = No
     logging.getLogger("stem").setLevel(logging.WARNING)
     logging.getLogger("asyncio").setLevel(logging.WARNING)
     
-    logger = logging.getLogger("tork")
-    logger.info(f"Tork logging initialized at {log_file}. Log file cleared for new session.")
+    logger = logging.getLogger("t0rd")
+    logger.info(f"T0rd logging initialized at {log_file}. Log file cleared for new session.")
     return log_file

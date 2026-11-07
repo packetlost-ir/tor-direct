@@ -7,16 +7,16 @@ from textual.message import Message
 from textual import work
 from rich.panel import Panel
 
-from tortalk.config import DEFAULT_LOCAL_PORT, SOCKS_PORT, CONTROL_PORT, CONNECT_TIMEOUT, clean_hash, normalize_and_validate_onion
-from tortalk.storage import StorageManager
-from tortalk.logger import setup_logging
+from t0rd.config import DEFAULT_LOCAL_PORT, SOCKS_PORT, CONTROL_PORT, CONNECT_TIMEOUT, clean_hash, normalize_and_validate_onion
+from t0rd.storage import StorageManager
+from t0rd.logger import setup_logging
 import logging
-from tortalk.network.tor import get_controller, create_onion_service, destroy_onion_service
-from tortalk.network.server import PeerServer
-from tortalk.network.client import connect_peer
-from tortalk.network.protocol import PeerSession, OP_CHAT, perform_protocol_handshake
-from tortalk.ui.commands import TorkCommandProvider
-from tortalk.ui.modals import AddContactModal
+from t0rd.network.tor import get_controller, create_onion_service, destroy_onion_service
+from t0rd.network.server import PeerServer
+from t0rd.network.client import connect_peer
+from t0rd.network.protocol import PeerSession, OP_CHAT, perform_protocol_handshake
+from t0rd.ui.commands import T0rdCommandProvider
+from t0rd.ui.modals import AddContactModal
 
 class PeerEvent(Message):
     def __init__(self, type, peer_hash, data=None):
@@ -25,7 +25,7 @@ class PeerEvent(Message):
         self.data = data
         super().__init__()
 
-class TorkApp(App):
+class T0rdApp(App):
     CSS = """
     Screen { background: $surface; color: $text; }
     #main { layout: horizontal; }
@@ -39,14 +39,14 @@ class TorkApp(App):
     .unread { color: $error; text-style: bold; }
     """
 
-    COMMANDS = App.COMMANDS | {TorkCommandProvider}
+    COMMANDS = App.COMMANDS | {T0rdCommandProvider}
     BINDINGS = [("q", "quit", "Quit"), ("a", "prompt_add_contact", "Add Contact")]
 
     def __init__(self, initial_target=None, config_dir=None, profile=None, local_port=DEFAULT_LOCAL_PORT, socks_port=SOCKS_PORT, control_port=CONTROL_PORT, tor_password=None, timeout=CONNECT_TIMEOUT):
         super().__init__()
         setup_logging(config_dir=config_dir, profile=profile)
-        self.logger = logging.getLogger("tork.app")
-        self.logger.info("Initializing TorkApp")
+        self.logger = logging.getLogger("t0rd.app")
+        self.logger.info("Initializing T0rdApp")
         self.storage = StorageManager(config_dir=config_dir, profile=profile)
         self.local_port, self.socks_port, self.control_port, self.tor_password, self.timeout = local_port, socks_port, control_port, tor_password, timeout
         self.profile = profile
@@ -63,7 +63,7 @@ class TorkApp(App):
             try:
                 import pyperclip
                 pyperclip.copy(self.local_onion_hash)
-                self.notify(f"Onion ID copied to clipboard: {self.local_onion_hash[:8]}...", title="Tork Identity")
+                self.notify(f"Onion ID copied to clipboard: {self.local_onion_hash[:8]}...", title="T0rd Identity")
             except Exception as e:
                 self.notify(f"Copy failed: {e}", severity="error")
 
@@ -156,7 +156,7 @@ class TorkApp(App):
 
             # 3. Bootstrap
             header.update("[bold yellow]Waiting for Tor bootstrap...[/]")
-            from tortalk.network.tor import wait_for_bootstrap
+            from t0rd.network.tor import wait_for_bootstrap
             bootstrapped = await asyncio.to_thread(wait_for_bootstrap, self.controller, timeout=30)
             if not bootstrapped:
                 self.logger.warning("Tor not fully bootstrapped, proceeding anyway")
@@ -207,7 +207,7 @@ class TorkApp(App):
 
             # 6. Ready
             header.update(f"[bold green]Ready:[/] {self.display_name} ({self.local_onion_hash[:8]}...)")
-            self.notify("Tork is ready!", title="Initialization")
+            self.notify("T0rd is ready!", title="Initialization")
             self.refresh_contacts()
             
         except Exception as e:

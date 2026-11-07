@@ -1,6 +1,6 @@
 from textual.command import Provider, Hit, Hits
 
-class TorkCommandProvider(Provider):
+class T0rdCommandProvider(Provider):
     async def search(self, query: str) -> Hits:
         matcher = self.matcher(query)
 

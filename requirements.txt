@@ -12,5 +12,5 @@ python-socks==3.1.1
 rich==15.0.0
 stem==1.8.2
 textual==8.2.8
--e git+https://github.com/packetlost-ir/tork.git@a576064df91e5141161bc564d8135dce1efb69f3#egg=tork
+-e git+https://github.com/packetlost-ir/t0rd.git@a576064df91e5141161bc564d8135dce1efb69f3#egg=t0rd
 typing_extensions==4.16.0

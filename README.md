@@ -1,11 +1,11 @@
 <div align="center">
 
-# 🧅 Tork (Tortalk)
+# 🧅 T0rd (Tortalk)
 
 **Secure, Serverless, Peer-to-Peer Terminal Chat over Tor v3 Onion Services**  
 *Built with Python, Textual, and End-to-End Encryption (E2EE).*
 
-[![PyPI version](https://img.shields.io/pypi/v/tortalk.svg?style=flat-square)](https://pypi.org/project/tortalk/)
+[![PyPI version](https://img.shields.io/pypi/v/t0rd.svg?style=flat-square)](https://pypi.org/project/t0rd/)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg?style=flat-square)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
@@ -22,13 +22,13 @@
 <!-- 
 Example of how to add a screenshot image later:
 <div align="center">
-  <img src="https://raw.githubusercontent.com/username/tork/main/docs/screenshot.png" alt="Tork TUI Preview" width="800">
+  <img src="https://raw.githubusercontent.com/username/t0rd/main/docs/screenshot.png" alt="T0rd TUI Preview" width="800">
 </div>
 -->
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│ 🧅 Tork Chat                                                │
+│ 🧅 T0rd Chat                                                │
 ├─────────────────┬───────────────────────────────────────────┤
 │ CONTACTS        │ Chat: alice [E2EE Secured]                │
 │                 │                                           │
@@ -48,27 +48,27 @@ Example of how to add a screenshot image later:
 
 ## 📦 Installation from PyPI
 
-Tork is available on PyPI. You can install it directly via pip:
+T0rd is available on PyPI. You can install it directly via pip:
 
 ```bash
-pip install tortalk
+pip install t0rd
 ```
 
 ---
 
 ## 🛠️ System Requirements & Prerequisites
 
-For Tork to run successfully on any target machine, ensure the following requirements are met:
+For T0rd to run successfully on any target machine, ensure the following requirements are met:
 
 ### 1. Tor Daemon Configuration
-Tork communicates directly with the local Tor daemon via the ControlPort and SOCKS5 proxy.
+T0rd communicates directly with the local Tor daemon via the ControlPort and SOCKS5 proxy.
 - **Tor Service:** Must be installed and actively running on the system.
 - **Ports (`/etc/tor/torrc`):**
   ```text
   SocksPort 9050
   ControlPort 9051
   ```
-- **Authentication:** By default, Tork relies on Tor cookie authentication or no-password control access. If your Tor daemon requires a password, supply it via the `--tor-password` flag.
+- **Authentication:** By default, T0rd relies on Tor cookie authentication or no-password control access. If your Tor daemon requires a password, supply it via the `--tor-password` flag.
 
 ### 2. System Environment
 - **Python:** Version `3.10` or higher.
@@ -93,16 +93,16 @@ pip install --editable .
 
 ## 💻 Usage & Commands
 
-Tork supports multiple profiles to run isolated instances concurrently.
+T0rd supports multiple profiles to run isolated instances concurrently.
 
 ### 1. Interactive TUI Chat
 Launch the terminal UI:
 ```bash
-tork chat
+t0rd chat
 ```
 With a custom profile and custom port:
 ```bash
-tork --profile alice -p 5666
+t0rd --profile alice -p 5666
 ```
 
 #### TUI Keyboard Shortcuts:
@@ -116,29 +116,29 @@ tork --profile alice -p 5666
 
 - **Display Local Onion ID:**
   ```bash
-  tork id --copy
+  t0rd id --copy
   ```
 
 - **Contact Management:**
   ```bash
   # Add contact
-  tork contact add alice <56-char-onion-hash>
+  t0rd contact add alice <56-char-onion-hash>
 
   # List contacts
-  tork contact list
+  t0rd contact list
 
   # Remove contact
-  tork contact remove alice
+  t0rd contact remove alice
   ```
 
 - **Headless Listener (Daemon mode):**
   ```bash
-  tork listen -p 5666 --tor-password "your_password"
+  t0rd listen -p 5666 --tor-password "your_password"
   ```
 
 - **One-shot CLI Message Send:**
   ```bash
-  tork send <onion-address-or-alias> "Hello over Tor E2EE!"
+  t0rd send <onion-address-or-alias> "Hello over Tor E2EE!"
   ```
 
 ---

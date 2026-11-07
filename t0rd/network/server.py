@@ -1,9 +1,9 @@
 import asyncio
 import traceback
 import logging
-from tortalk.network.protocol import perform_protocol_handshake
+from t0rd.network.protocol import perform_protocol_handshake
 
-logger = logging.getLogger("tork.network.server")
+logger = logging.getLogger("t0rd.network.server")
 
 class PeerServer:
     def __init__(self, host, port, local_hash, local_name, session_callback):

@@ -16,8 +16,8 @@ def derive_shared_key(private_key: x25519.X25519PrivateKey, peer_public_bytes: b
     derived_key = HKDF(
         algorithm=hashes.SHA256(),
         length=32,
-        salt=b"tork-e2ee-salt-v1",
-        info=b"tork-handshake",
+        salt=b"t0rd-e2ee-salt-v1",
+        info=b"t0rd-handshake",
     ).derive(shared_secret)
     return derived_key
 

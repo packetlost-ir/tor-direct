@@ -3,9 +3,9 @@ import struct
 import json
 import time
 import logging
-from tortalk.crypto import generate_ephemeral_keypair, derive_shared_key, encrypt_message, decrypt_message
+from t0rd.crypto import generate_ephemeral_keypair, derive_shared_key, encrypt_message, decrypt_message
 
-logger = logging.getLogger("tork.network.protocol")
+logger = logging.getLogger("t0rd.network.protocol")
 
 # Opcodes
 OP_HANDSHAKE_INIT = 1
