@@ -16,7 +16,7 @@
 ## 📦 Installation
 
 ```bash
-pip install tor_direct
+pip install tor-direct
 ```
 
 see [setup](/SETUP.md).
